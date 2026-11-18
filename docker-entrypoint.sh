@@ -1,3 +1,4 @@
+
 #!/bin/sh
 set -eu
 
@@ -14,5 +15,7 @@ if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
 fi
 
 php artisan migrate --force
+
+php artisan tinker --execute="App\Models\User::updateOrCreate(['email' => 'admin@gmail.com'], ['name' => 'Administrator', 'password' => bcrypt('Pass_123')]);"
 
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-10000}"
