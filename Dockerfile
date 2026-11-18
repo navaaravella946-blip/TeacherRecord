@@ -1,4 +1,15 @@
 
+# Stage 1: Build frontend assets
+FROM node:22-bookworm-slim AS frontend
+
+WORKDIR /var/www/html
+
+COPY . .
+
+RUN npm install && npm run build
+
+
+# Stage 2: Build Laravel application
 FROM php:8.4-cli-bookworm
 
 RUN apt-get update \
@@ -11,9 +22,13 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
+
 RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --no-scripts --no-autoloader
 
 COPY . .
+
+# Copy the compiled CSS and JavaScript
+COPY --from=frontend /var/www/html/public/build ./public/build
 
 RUN composer dump-autoload --no-dev --optimize \
     && php artisan package:discover \
